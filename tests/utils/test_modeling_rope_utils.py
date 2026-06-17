@@ -136,6 +136,27 @@ class RopeTest(unittest.TestCase):
             self.assertEqual(len(logs.output), 1)
             self.assertIn("implicit factor", logs.output[0])
 
+    def test_longrope_non_list_factor_validation(self):
+        """`longrope` validation must warn (not crash) when `short_factor`/`long_factor` is present but not a list.
+
+        Previously the `len(...)` length check ran unconditionally after the type-check warning, raising
+        `TypeError: object of type 'NoneType' has no len()` instead of emitting a graceful warning.
+        """
+        config = LlamaConfig()
+        valid_factor = [1.0] * (config.hidden_size // config.num_attention_heads // 2)
+        for bad_value in (None, 1.0):
+            rope_config = {
+                "rope_type": "longrope",
+                "factor": 2.0,
+                "original_max_position_embeddings": 1,
+                "short_factor": bad_value,
+                "long_factor": valid_factor,
+            }
+            config.rope_parameters = rope_config
+            with self.assertLogs("transformers.modeling_rope_utils", level="WARNING") as logs:
+                config.validate_rope()  # must not raise
+            self.assertTrue(any("short_factor field must be a list" in line for line in logs.output))
+
     def test_convert_rope_params_to_dict_with_list_ignore_keys(self):
         # Regression test for #46121: `ignore_keys_at_rope_validation` becomes a list when loaded from a config.json
         # (JSON has no set type). `convert_rope_params_to_dict` used to do `list | set` and crash with

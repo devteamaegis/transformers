@@ -904,7 +904,7 @@ class RotaryEmbeddingConfigMixin:
         short_factor = rope_parameters.get("short_factor")
         if not (isinstance(short_factor, list) and all(isinstance(x, (int, float)) for x in short_factor)):
             logger.warning(f"`rope_parameters`'s short_factor field must be a list of numbers, got {short_factor}")
-        if len(short_factor) != dim // 2:
+        elif len(short_factor) != dim // 2:
             logger.warning(
                 f"`rope_parameters`'s short_factor field must have length {dim // 2}, got {len(short_factor)}"
             )
@@ -912,7 +912,7 @@ class RotaryEmbeddingConfigMixin:
         long_factor = rope_parameters.get("long_factor")
         if not (isinstance(long_factor, list) and all(isinstance(x, (int, float)) for x in long_factor)):
             logger.warning(f"`rope_parameters`'s long_factor field must be a list of numbers, got {long_factor}")
-        if len(long_factor) != dim // 2:
+        elif len(long_factor) != dim // 2:
             logger.warning(
                 f"`rope_parameters`'s long_factor field must have length {dim // 2}, got {len(long_factor)}"
             )
